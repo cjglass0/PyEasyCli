@@ -42,9 +42,18 @@ class LineContainerFormatter(ContainerFormatter):
 
             # content, if there is space for it
             if container.get_content_width() > 0:
-                content_string = self.get_content_string(container, row)
+                y_adjusted_row = row - container.viewport_y
+                content_string = self.get_content_string(container, y_adjusted_row)
+                if container.viewport_x > 0:
+                    # shift all content to the right
+                    content_string = (container.content_character * container.viewport_x) + content_string
+                elif container.viewport_x < 0:
+                    # shift all content to the left
+                    content_string = content_string[-container.viewport_x:] + (container.content_character * -container.viewport_x)
                 if len(content_string) > container.get_content_width():
                     content_string = content_string[:container.get_content_width()]
+                elif len(content_string) < container.get_content_width():
+                    content_string = content_string + (container.content_character * (container.get_content_width() - len(content_string)))
                 result += content_string
 
             # right padding
@@ -57,5 +66,14 @@ class LineContainerFormatter(ContainerFormatter):
     
     def get_content_string(self, container:Container, row:int) -> str:
         if container.row_in_content(row):
+            if container.children is not None:
+                children_row = ""
+                for elem in container.children:
+                    #TODO get container layout
+                    child:Container = elem
+                    children_row += self.get_full_row_string(child, row - container.get_margin_size())
+                
+                return children_row + (container.content_character * container.get_content_width())
+
             return container.content_character * container.get_content_width()
         return ""
