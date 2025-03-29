@@ -1,4 +1,4 @@
-from core.widgets import Container
+from core.widgets import Container, LayoutType
 from tests.test_utility import TestUtility
 
 class TestContainer:
@@ -105,3 +105,91 @@ class TestContainer:
         assert not container.row_in_content(2)
         assert not container.row_in_content(3)
         assert not container.row_in_content(4)
+
+    def test_container_horizontal_children(self):
+        container:Container = TestUtility.create_container(0, 0, 10, 5)
+        container.layout_type = LayoutType.HORIZONTAL
+
+        child1:Container = TestUtility.create_container(0, 0, 1, 1)
+        assert child1.x == 0
+
+        container.add_child(child1)
+        assert child1.x == 0
+
+        child2:Container = TestUtility.create_container(0, 0, 1, 1)
+        assert child2.x == 0
+
+        container.add_child(child2)
+        assert child2.x == 1
+
+    def test_container_vertical_children(self):
+        container:Container = TestUtility.create_container(0, 0, 10, 5)
+        container.layout_type = LayoutType.VERTICAL
+
+        child1:Container = TestUtility.create_container(0, 0, 1, 1)
+        assert child1.y == 0
+
+        container.add_child(child1)
+        assert child1.y == 0
+
+        child2:Container = TestUtility.create_container(0, 0, 1, 1)
+        assert child2.y == 0
+
+        container.add_child(child2)
+        assert child2.y == 1
+
+    def test_container_free_children(self):
+        container:Container = TestUtility.create_container(0, 0, 10, 5)
+        container.layout_type = LayoutType.FREE
+
+        child1:Container = TestUtility.create_container(0, 0, 1, 1)
+        assert child1.x == 0
+        assert child1.y == 0
+
+        container.add_child(child1)
+        assert child1.x == 0
+        assert child1.y == 0
+
+        child2:Container = TestUtility.create_container(0, 0, 1, 1)
+        assert child2.x == 0
+        assert child2.y == 0
+
+        container.add_child(child2)
+        assert child2.x == 0
+        assert child2.y == 0
+
+    def test_container_apply_layout(self):
+        container:Container = TestUtility.create_container(0, 0, 10, 5)
+        container.layout_type = LayoutType.FREE
+
+        child1:Container = TestUtility.create_container(0, 0, 1, 1)
+        assert child1.x == 0
+        assert child1.y == 0
+
+        container.add_child(child1)
+        assert child1.x == 0
+        assert child1.y == 0
+
+        child2:Container = TestUtility.create_container(0, 0, 1, 1)
+        assert child2.x == 0
+        assert child2.y == 0
+
+        container.add_child(child2)
+        assert child2.x == 0
+        assert child2.y == 0
+
+        container.apply_layout(LayoutType.HORIZONTAL)
+
+        assert child1.x == 0
+        assert child1.y == 0
+
+        assert child2.x == 1
+        assert child2.y == 0
+
+        container.apply_layout(LayoutType.VERTICAL)
+
+        assert child1.x == 0
+        assert child1.y == 0
+
+        assert child2.x == 0
+        assert child2.y == 1
