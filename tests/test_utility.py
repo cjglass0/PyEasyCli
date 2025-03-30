@@ -14,3 +14,7 @@ class TestUtility:
             assert False
         for i in range(0, len(list1)):
             assert list1[i] == list2[i]
+
+    def print_lines(lines:list):
+        for line in lines:
+            print(line)

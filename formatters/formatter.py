@@ -64,14 +64,52 @@ class LineContainerFormatter(ContainerFormatter):
 
         return result
     
+    def overlay_string(self, base_string:str, start_index:int, overlay_string:str, fill_char:str='!') -> str:
+        visible_base_string = ""
+        fill_string = ""
+        # new idea: figure out the visible base string and if it goes before or after the overlay string
+        if start_index >= len(base_string):
+            # start index past base string
+            visible_base_string = base_string
+            fill_string = fill_char * (start_index - len(base_string))
+            return visible_base_string + fill_string + overlay_string
+        elif start_index + len(overlay_string) <= 0:
+            # overlay ends before base string
+            visible_base_string = base_string
+            fill_string = fill_char * (-start_index - len(overlay_string))
+            return overlay_string + fill_string + visible_base_string
+        elif start_index <= 0 and start_index + len(overlay_string) > len(base_string):
+            # overlay completely covers base string
+            return overlay_string
+        else:
+            # base string is partially visible
+            if start_index <= 0 and start_index + len(overlay_string) <= len(base_string):
+                # overlay starts before base string, ends before base string does
+                visible_base_string = base_string[start_index + len(overlay_string):]
+                return overlay_string + visible_base_string
+            elif start_index > 0 and start_index + len(overlay_string) > len(base_string):
+                # overlay starts after base string, ends after base string does
+                visible_base_string = base_string[:start_index]
+                return visible_base_string + overlay_string
+            else:
+                # overlay starts and ends inside base string
+                pre_string = base_string[:start_index]
+                post_string = base_string[start_index + len(overlay_string):]
+                return pre_string + overlay_string + post_string
+
     def get_content_string(self, container:Container, row:int) -> str:
         if container.row_in_content(row):
             if container.children is not None:
                 children_row = ""
                 for elem in container.children:
-                    #TODO get container layout
                     child:Container = elem
-                    children_row += self.get_full_row_string(child, row - container.get_margin_size())
+                    child_full_row = self.get_full_row_string(child, row - container.get_margin_size() - child.y)
+                
+                    children_row = self.overlay_string(children_row, child.x, child_full_row, container.content_character)
+                    
+                    # trim the front if necessary
+                    if child.x < 0:
+                        children_row = children_row[-child.x:]
                 
                 return children_row + (container.content_character * container.get_content_width())
 

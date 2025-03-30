@@ -1,6 +1,6 @@
 import pytest
 
-from core.widgets import Container
+from core.widgets import Container, LayoutType
 from formatters.formatter import LineContainerFormatter
 from tests.test_utility import TestUtility
 
@@ -358,6 +358,118 @@ class TestLineFormatterEndToEnd:
             "# XXXX #",
             "#      #",
             "########"
+        ]
+
+        TestUtility.assert_string_lists_match(lines, expected_lines)
+
+    def test_container_layout_vertical(self):
+        container:Container = TestUtility.create_container(0,0,8,8)
+        container.border_size = 1
+        container.padding_size = 1
+
+        child1:Container = TestUtility.create_container(0,0,1,1)
+        child1.content_character = 'Z'
+
+        child2:Container = TestUtility.create_container(0,0,2,1)
+        child2.content_character = 'Y'
+
+        container.add_child(child1)
+        container.add_child(child2)
+
+        line_formatter = LineContainerFormatter()
+        lines = line_formatter.format(container)
+
+        expected_lines = [
+            "########",
+            "#      #",
+            "# ZYYX #",
+            "# XXXX #",
+            "# XXXX #",
+            "# XXXX #",
+            "#      #",
+            "########"
+        ]
+
+        TestUtility.assert_string_lists_match(lines, expected_lines)
+
+        container.apply_layout(LayoutType.VERTICAL)
+        lines = line_formatter.format(container)
+
+        expected_lines = [
+            "########",
+            "#      #",
+            "# ZXXX #",
+            "# YYXX #",
+            "# XXXX #",
+            "# XXXX #",
+            "#      #",
+            "########"
+        ]
+
+        
+        TestUtility.assert_string_lists_match(lines, expected_lines)
+
+    def test_container_layering(self):
+        container:Container = TestUtility.create_container(0,0,5,5)
+        
+        child1:Container = TestUtility.create_container(0,0,2,2)
+        child1.content_character = 'Z'
+
+        child2:Container = TestUtility.create_container(0,0,2,2)
+        child2.content_character = 'Y'
+
+        container.add_child(child1)
+        container.add_child(child2)
+        container.apply_layout(LayoutType.FREE)
+
+        line_formatter = LineContainerFormatter()
+        lines = line_formatter.format(container)
+
+        expected_lines = [
+            "YYXXX",
+            "YYXXX",
+            "XXXXX",
+            "XXXXX",
+            "XXXXX"
+        ]
+
+        TestUtility.assert_string_lists_match(lines, expected_lines)
+
+        child2.x = 1
+        lines = line_formatter.format(container)
+
+        expected_lines = [
+            "ZYYXX",
+            "ZYYXX",
+            "XXXXX",
+            "XXXXX",
+            "XXXXX"
+        ]
+
+        TestUtility.assert_string_lists_match(lines, expected_lines)
+
+        child2.x = 2
+        lines = line_formatter.format(container)
+
+        expected_lines = [
+            "ZZYYX",
+            "ZZYYX",
+            "XXXXX",
+            "XXXXX",
+            "XXXXX"
+        ]
+
+        TestUtility.assert_string_lists_match(lines, expected_lines)
+
+        child2.x = -1
+        lines = line_formatter.format(container)
+
+        expected_lines = [
+            "YZXXX",
+            "YZXXX",
+            "XXXXX",
+            "XXXXX",
+            "XXXXX"
         ]
 
         TestUtility.assert_string_lists_match(lines, expected_lines)
